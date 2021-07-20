@@ -1,7 +1,10 @@
 
+Here are the one by one steps to create the datasets and to train and test all the models from the results reported in the paper.
+All the created datasets will be directed to be stored inside the ```/data``` directory, and the trained models (from the best epoch) will be directed to be stored in the ```/models``` directory. 
+
 <i>Note: Check the config_ijcai.py file to change the output paths where the datasets and models will be stored in your system.</i>
 
-# Creating Main Datasets
+## Creating Main Datasets
 
 
 ### TRAIN, DEV, TEST datasets from MNIST [LeCun and Cortes, 2010]
@@ -35,7 +38,7 @@ python3 create_DIGIT_PAIR.py --mnist_seed 20 --single_size <DIGIT_SIZE> --operat
 python3 create_properties_val_test_datasets.py --mnist_seed 20 --associativity_size 50000 --commutativity_size 50000 --distributivity_size 50000 --seed 20
 ```
 
-# Joint Learning
+## Joint Learning
 
 ### We run experiments for each logic relaxation: <TNORM> 
 
@@ -84,7 +87,7 @@ python3 create_properties_val_test_datasets.py --mnist_seed 20 --associativity_s
 python3 training_jointly.py --test <TEST> --DIGIT_size <DIGIT_SIZE> --PAIR_size <PAIR_SIZE> --data_option 2 --data_seed 20 --Dev_Test_size 50000 --train_batch_size <TRAIN_BATCH_SIZE> --validation_batch_size 1024 --tnorm <TNORM> --nepochs <NEPOCHS> --seed <SEED> --learning_rate <LEARNING_RATE> --optimizer <OPTIMIZER> --lambda_coef <LAMBDA> --warm_up_epochs <WARM_UP_EPOCHS> --Godel_Optim <GODEL_OPTIM> --Godel_lambda <GODEL_LAMBDA> --Godel_lr <GODEL_LR>
 ```
 
-# Pipelined Learning
+## Pipelined Learning
 
 <i> We ran experiments for each logic relaxation: \<TNORM> </i> 
 
