@@ -2,14 +2,13 @@
 
 We empirically study the differences between logic relaxations using two tasks: recognizing digits and arithmetic operations over them, and text chunking.
 
-### 1. Recognizing digits and arithmetic operations:
+<!--### 1. Recognizing digits and arithmetic operations-->
 
-* [Code](digits_and_arithmetic_experiments) 
-* [Documentation](digits_and_arithmetic_experiments/documentation.md)
+### [Recognizing digits and arithmetic operations](digits_and_arithmetic_experiments)
+<!-- * [Code](digits_and_arithmetic_experiments) 
+* [Documentation](digits_and_arithmetic_experiments/documentation.md) -->
 
 
-### 2. Text chunking
+### Text chunking
 
-* [Code]
-* [Documentation]
 
