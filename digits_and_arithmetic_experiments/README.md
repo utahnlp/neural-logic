@@ -1,13 +1,15 @@
 
-Here are the one by one steps to create the datasets and to train and test all the models from the results reported in the paper.
+Here are the one by one steps to create the datasets, and to train and test all the models from the results reported in the paper.
 All the created datasets will be directed to be stored inside the ```/data``` directory, and the trained models (from the best epoch) will be directed to be stored in the ```/models``` directory. 
 
 <i>Note: Check the config_ijcai.py file to change the output paths where the datasets and models will be stored in your system.</i>
 
+From the ```/code``` folder run the following commands:
+
 ## Creating Main Datasets
 
 
-### TRAIN, DEV, TEST datasets from MNIST [LeCun and Cortes, 2010]
+### To create the TRAIN, DEV, TEST datasets from MNIST [LeCun and Cortes, 2010]
 
 <i> Run (experiments in the paper use seed 20 to create the datasets): </i>
 
