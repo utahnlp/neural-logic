@@ -150,39 +150,39 @@ This process is done to crate dataset to for all sizes combinations:
 python3 noisy_labeling.py --digit_size 5000 --pair_size 5000 --dev_test_size 50000 --option 2 --ope_seed 20 --learning_rate 0.001 --optimizer 1 --tnorm rprod --model_seed 20 --nepochs 1600
 ```
 
-### We train the Sum and Product operator models using the noisy labeled dataset from the previous section:
+#### 3.3 Training the Sum and Product operator models independently using the (noisy) labeled datasets.
 
-#### The following parameters of the program are used to find the right noisy labeled dataset to train the operator models
-* \<PAIR_SEED>: Seed used to create the PAIR and Noisy labeled (NOISYPAIR) data. We used 20 in our experiments.
-* \<DIGIT_SIZE>: 1000, 5000, 25000. Size of the DIGIT data used to train the Digit classifier used to label the NOISYPAIR data. 
-* \<NOISYPAIR_SIZE>: 1000, 5000, 25000. Size of the NOISYPAIR set.
-* data_option: always 2 
-* PAIR_val_test_size: Size of the PairDEV and PairTEST sets. We use 50,000.
-* \<Digit_MODEL_LR> :Learning rate used to train the Digit model used to label de NOISYPAIR data
-* <Digit_MODEL_OPTIMIZER>: Optimizer used to train the Digit model used to label the NOISYPAIR data. 0 if SGD, 1 if Adam.
-* <Digit_NEPOCH>: Number of epochs used to train the Digit model. We use 1600 epochs. 
-* <Digit_SEED>: seed used to train the Digit model. We used 0, 20, 50.
-* <TNORM>: t-norm in use.
- 
+The following parameters of the program are used to find the right noisy labeled dataset to train the operator models
 
+```
+--data_seed: Seed used to create the PAIR and Noisy labeled (NOISYPAIR) data. We used 20 in our experiments.
+--DIGIT_size: 1000, 5000, 25000. Size of the DIGIT data used to train the Digit classifier used to label the NOISYPAIR data. 
+--PAIR_size: 1000, 5000, 25000. Size of the NOISYPAIR set.
+--PAIR_val_test_size: Size of the PairDEV and PairTEST sets. We use 50,000.
+--DigitModel_lr: Learning rate used to train the Digit model used to label de NOISYPAIR data
+--Digit_Optimizer: Optimizer used to train the Digit model used to label the NOISYPAIR data. 0 if SGD, 1 if Adam.
+--Digit_nepochs: Number of epochs used to train the Digit model. We use 1600 epochs. 
+--Digit_seed: seed used to train the Digit model. We used 0, 20, 50.
+```
+For operator models tuning we perform grid search over the following hyper-parameters using PairDEV set for development:
+```
+--train_batch_size: 8, 16, 32, 64
+--training_lr: 10^−1, 5×10^−2, 10^−2, 5×10^−3, 10^−3, 5×10^−4, 10^−4, 5×10^−5, 10^−5
+--training_optimizer: 0 (SGD), 1 (Adam)
+--training_n_epochs: We trained each hyper-paramenter combination for 300 epochs to find the best one.
+--training_seed: 0, 20, 50
+```
 
-#### For operator models tuning we perform grid search over the following hyper-parameters using PairDEV set for development:
-* \<TRAIN_BATCH_SIZE>: 8, 16, 32, 64
-* \<LEARNING_RATE>: 10^−1, 5×10^−2, 10^−2, 5×10^−3, 10^−3, 5×10^−4, 10^−4, 5×10^−5, 10^−5
-* \<OPTIMIZER>: 0 (SGD), 1 (Adam)
-* \<NEPOCHS>: We trained each hyper-paramenter combination for 300 epochs to find the best one.
-* \<SEED>: 0, 20, 50
-* \<TRAIN_NEPOCHS>: 300 for hyper-parameter tuning.
-
-#### These are the parameters used for training the operator (Sum or Product):
-* \<OPERATOR>: sum or prod
-* \<TRAIN_NEPOCHS>:  Number of epochs to train the models
-* \<WARM_EPOCHS>: Only for Godel t-norm. This is the number of epochs we "warm-up" the system using the (s)product t-norm.
-
+Parameters used for training the operator (Sum or Product):
+```
+--arithmethic_operator: sum or prod
+--training_n_epochs:  Number of epochs to train the models
+--warm_nepochs: Only for Godel t-norm. This is the number of epochs we "warm-up" the system using the (s)product t-norm (We used 6-10 epochs)
+```
 
 
 ```
-python3 operator_model_train.py --test False --data_seed <PAIR_SEED> --DIGIT_size <DIGIT_SIZE> --PAIR_size <NOISYPAIR_SIZE> --data_option 2 --PAIR_val_test_size 50000 --DigitModel_lr <Digit_MODEL_LR> --Digit_Optimizer <Digit_MODEL_OPTIMIZER> --Digit_nepochs <Digit_NEPOCH> --Digit_seed <Digit_SEED> --tnorm <TNORM> --arithmethic_operator <OPERATOR> --train_batch_size <BATCH_SIZE> --valid_batch_size 1024 --training_n_epochs <TRAIN_NEPOCHS> --training_optimizer <OPTIMIZER> --training_lr <LEARNING_RATE> --training_seed <SEED> --warm_nepochs -1
+python3 operator_model_train.py --test False --data_seed 20 --DIGIT_size 5000 --PAIR_size 5000 --data_option 2 --PAIR_val_test_size 50000 --DigitModel_lr 0.001 --Digit_Optimizer 1 --Digit_nepochs 1600 --Digit_seed 20 --tnorm rprod --arithmethic_operator sum --train_batch_size 64 --valid_batch_size 1024 --training_n_epochs 1600 --training_optimizer 0 --training_lr 10^−1 --training_seed 20 --warm_nepochs -1
 ```
 
 
