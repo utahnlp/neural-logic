@@ -63,7 +63,7 @@ We run experiments for each t-norm relaxation we are considering and for all dat
 ```
  #### 2.1 Model tuning
  
-- For model tuning we perform grid search over the following hyper-parameters using PairDEV set for development:
+For model tuning we perform grid search over the following hyper-parameters using PairDEV set for development:
  ```
 --train_batch_size: [8, 16, 32, 64]
 --learning_rate: [10^−1, 5×10^−2, 10^−2, 5×10^−3, 10^−3, 5×10^−4, 10^−4, 5×10^−5, 10^−5]
@@ -105,31 +105,30 @@ python3 training_jointly.py --test False --DIGIT_size 5000 --PAIR_size 5000 --da
 
 ## Pipelined Learning
 
-<i> We ran experiments for each logic relaxation: \<TNORM> </i> 
-
-* Lukasiewicz
-* Gödel
-* S-Product (Same as R-Product when there are not constraints)
-
-### We train the Digit model with DIGIT data alone using each t-norm.
-
-#### Sizes of datasets combinations:
-* <SIZE_DATA>: 1000, 5000, 25000
-
-
-#### For Digit model tunning: we performed grid search over the following hyper-parameters:
-
-* \<BATCH_SIZE>: 8, 16, 32, 64
-* \<LEARNING_RATE>: 10^−1, 5×10^−2, 10^−2, 5×10^−3, 10^−3, 5×10^−4, 10^−4, 5×10^−5, 10^−5
-* \<OPTIMIZER>: 0 (SGD), 1 (Adam)
-* \<NEPOCHS>: 300
-* \<SEED>: 20 (0, 50)
-
-
-#### We train the model using the best hyperparameters for each t-norm and save the one from the epoch with best development accuracy.
+We run experiments for each t-norm relaxation we are considering and for all dataset sizes combinations:
 
 ```
-python3 digit_model_train.py --size_data <SIZE_DATA> --data_seed <SEED> --learning_rate <LEARNING_RATE> --optimizer <OPTIMIZER> --batch_size <BATCH_SIZE> --nepochs <NEPOCHS> --seed <SEED> --tnorm <TNORM> --test True
+--tnorm: [prod (S-Product), rprod (R-Product), luka (Lukasiewicz), godel (Gödel)]
+--DIGIT_size: [1000, 5000, 25000]
+--PAIR_size: [ 1000, 5000, 25000]
+
+```
+#### 3.1 Digit classifier training
+
+We train the Digit model with DIGIT data alone using each t-norm.
+
+Digit model tunning: we performed grid search over the following hyper-parameters:
+```
+--batch_size: 8, 16, 32, 64
+--learning_rate: 10^−1, 5×10^−2, 10^−2, 5×10^−3, 10^−3, 5×10^−4, 10^−4, 5×10^−5, 10^−5
+--optimizer: 0 (SGD), 1 (Adam)
+--nepochs: 300
+--seed: 20 (0, 50)
+```
+We train the model using the best hyperparameters for each t-norm and save the one from the epoch with best development accuracy.
+
+```
+python3 digit_model_train.py --size_data 5000 --data_seed 20 --learning_rate 0.001 --optimizer 1 --batch_size 64 --nepochs 250 --seed 20 --tnorm prod --test False
 ```
 
 ### We created the (noisy) labeled datasets.
