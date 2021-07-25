@@ -52,7 +52,7 @@ Arguments description for 1.1, 1.2, 1.3:
 
 ## 2. Joint Learning
 
-We jointly train the Digit, Sum and Product classifiers (we use DIGIT data to train Digit and instantiate the coherence constraints on the (unlabeled) PAIR data to obtain signal to train Sum and Product).
+We jointly train the Digit, Sum and Product classifiers (we use the DIGIT data to train Digit and the (unlabeled) PAIR data to instantiate the coherence constraint and train the Sum and Product classifiers).
 
 
 We run experiments for each t-norm relaxation we are considering and for all dataset sizes combinations:
@@ -100,7 +100,7 @@ We run the experiments three times using different seeds for each data combinati
 ```
  
 ```
-python3 training_jointly.py --test False --DIGIT_size 5000 --PAIR_size 5000 --data_option 2 --data_seed 20 --Dev_Test_size 50000 --train_batch_size 64 --validation_batch_size 1024 --tnorm rprod --nepochs 1000 --seed 20 --learning_rate 10^−1 --optimizer 0 --lambda_coef 0.1 --warm_up_epochs 2 --Godel_Optim 0 --Godel_lambda 0.1  --Godel_lr 0.001
+python3 training_jointly.py --test False --DIGIT_size 5000 --PAIR_size 5000 --data_option 2 --data_seed 20 --Dev_Test_size 50000 --train_batch_size 64 --validation_batch_size 1024 --tnorm rprod --nepochs 1600 --seed 20 --learning_rate 10^−1 --optimizer 0 --lambda_coef 0.1 --warm_up_epochs 2 --Godel_Optim 0 --Godel_lambda 0.1  --Godel_lr 0.001
 ```
 
 ## Pipelined Learning
@@ -111,7 +111,6 @@ We run experiments for each t-norm relaxation we are considering and for all dat
 --tnorm: [prod (S-Product), rprod (R-Product), luka (Lukasiewicz), godel (Gödel)]
 --DIGIT_size: [1000, 5000, 25000]
 --PAIR_size: [ 1000, 5000, 25000]
-
 ```
 #### 3.1 Digit classifier training
 
@@ -128,27 +127,27 @@ Digit model tunning: we performed grid search over the following hyper-parameter
 We train the model using the best hyperparameters for each t-norm and save the one from the epoch with best development accuracy.
 
 ```
-python3 digit_model_train.py --size_data 5000 --data_seed 20 --learning_rate 0.001 --optimizer 1 --batch_size 64 --nepochs 250 --seed 20 --tnorm prod --test False
+python3 digit_model_train.py --size_data 5000 --data_seed 20 --learning_rate 0.001 --optimizer 1 --batch_size 64 --nepochs 1600 --seed 20 --tnorm rprod --test False
 ```
 
-### We created the (noisy) labeled datasets.
+#### 3.2 Creating the (noisy) labeled datasets.
 
-<i> We use the previous Digit models (trained alone) to re-label the PAIR data: For each example in PAIR ( [Im_1 - Label_1], [Im_2 - Label_2]) we ignore the labels (Label_1, Label_2) and consider the new noisy labeled pair ( [Im_1 - Digit(Im_1)],  [Im_2 - Digit(Im_2)] ) where Digit(Im_i) is the label predicted by the Digit model on image Im_i.</i>
+<i> We use the predictions of previous Digit models (trained alone) to label the pair of images in the PAIR data</i>
 
-#### This process is done to crate dataset to for all sizes combinations:
-* \<DIGIT_SIZE>: 1000, 5000, 25000
-* \<PAIR_SIZE>: 1000, 5000, 25000
-* dev_test_size: Size of PairDEV and PairTEST. We set this size to 50,000
-* option: 2
-* \<LEARNING_RATE>: Learning rate that was used to train the Digit classifier that is being used to label the data.
-* \<OPTIMIZER>: Optimizer that was used to train the Digit classifier that is being used to label the data; 1 Adam, 0 SGD.
-* \<TNORM>: t-norm in use. The t-norm we used to train the Digit classifier used to label the data. The resulting data will be used to train the Sum and Prod classifiers using this same t-norm as parameter.
-* \<SEED>: 20 (0, 50).
-* \<NEPOCHS>: We used 1600 epochs. This models converge much earlier but we wanted to use the same number of epochs we used in the joint training method given that we are comparing them. 
-
+This process is done to crate dataset to for all sizes combinations:
+```
+--digit_size: 1000, 5000, 25000
+--pair_size: 1000, 5000, 25000
+--dev_test_size: Size of PairDEV and PairTEST. We set this size to 50000
+--learning_rate: Learning rate that was used to train the Digit classifier that is being used to label the data.
+--optimizer: Optimizer that was used to train the Digit classifier that is being used to label the data; 1 Adam, 0 SGD.
+--tnorm: t-norm in use. The t-norm we used to train the Digit classifier used to label the data. The resulting data will be used to train the Sum and Prod classifiers using this same t-norm as parameter.
+--model_seed: 20 (0, 50).
+--nepochs: We used 1600 epochs. This models converge much earlier but we wanted to use the same number of epochs we used in the joint training method given that we are comparing them. 
+```
 
 ```
-python3 noisy_labeling.py --digit_size <DIGIT_SIZE> --pair_size <PAIR_SIZE> --dev_test_size 50000 --option 2 --ope_seed 20 --learning_rate <LEARNING_RATE> --optimizer <OPTIMIZER> --tnorm <TNORM> --model_seed <SEED> --nepochs <NEPOCHS>
+python3 noisy_labeling.py --digit_size 5000 --pair_size 5000 --dev_test_size 50000 --option 2 --ope_seed 20 --learning_rate 0.001 --optimizer 1 --tnorm rprod --model_seed 20 --nepochs 1600
 ```
 
 ### We train the Sum and Product operator models using the noisy labeled dataset from the previous section:
