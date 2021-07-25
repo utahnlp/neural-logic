@@ -61,6 +61,7 @@ We run experiments for each t-norm relaxation we are considering and for all dat
 --DIGIT_size: [1000, 5000, 25000]
 --PAIR_size: [ 1000, 5000, 25000]
 ```
+ #### 2.1 Model tuning
  
 - For model tuning we perform grid search over the following hyper-parameters using PairDEV set for development:
  ```
@@ -71,7 +72,9 @@ We run experiments for each t-norm relaxation we are considering and for all dat
 --nepochs: We trained each hyper-paramenter combination for 300 epochs to find the best one.
  ```
 
-- We run the experiments three times using different seeds for each data combination with their corresponding best hyperparameters combinations from model tuning process. We use the models from the epoch with best average development accuracy between Digit accuracy, Product Coherence accuracy and Sum Coherence accuracy:
+#### 2.2 Experiments
+
+We run the experiments three times using different seeds for each data combination with their corresponding best hyperparameters combinations from model tuning process. We use the models from the epoch with best average development accuracy between Digit accuracy, Product Coherence accuracy and Sum Coherence accuracy:
 
  ```
 --seed: 20 (dataset seed) & [0, 50](experiments seed): [0, 20, 50] (extra runs in some cases with 1, 10, 60)
@@ -91,9 +94,9 @@ We run experiments for each t-norm relaxation we are considering and for all dat
 
  ```
 --test: True to save the resulting models, False otherwise
-validation_batch_size: 1024 or the biggest size allowed by the system used
-data_option: always 2
-data_seed: 20 or the one used to create the datasets in the previous section
+--validation_batch_size: 1024 or the biggest size allowed by the system used
+--data_option: always 2
+--data_seed: 20 or the one used to create the datasets in the previous section
 ```
  
 ```
