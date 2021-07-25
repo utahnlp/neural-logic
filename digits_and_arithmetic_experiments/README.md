@@ -27,8 +27,8 @@ python3 create_DIGIT_PAIR.py --mnist_seed 20 --single_size 1000 --operator_train
 This creates a pickle file containing the following datasets:
 ```
 DIGIT: Sub-sampled (single digit) dataset for training
-PAIR: Creates examples containing pair of digits for training the operator (Sum/Product) classifiers. This is created from the sub-sampled dataset: DIGIT.
-PairDEV: The development set of a pair of images created from the MNIST development set (created in step 1.1).
+PAIR: Creates examples containing (unlabeled) pair of digits for training the operator (Sum/Product) classifiers. This is created from the sub-sampled dataset: DIGIT.
+PairDEV: The development set of (unlabeled) pair of images created from the MNIST development set (created in step 1.1).
 PairTEST: The test set of a pair of images created from the MNIST test set (from step 1.1).
 ```
 
@@ -52,60 +52,52 @@ Arguments description for 1.1, 1.2, 1.3:
 
 ## 2. Joint Learning
 
-We run experiments for each logic relaxation: <TNORM> 
-
-* Lukasiewicz
-* Gödel
-* S-Product
-* R-Product
+We jointly train the Digit, Sum and Product classifiers (we use DIGIT data to train Digit and instantiate the coherence constraints on the (unlabeled) PAIR data to obtain signal to train Sum and Product).
 
 
-And for each dataset combinations sizes:
+We run experiments for each t-norm relaxation we are considering and for all dataset sizes combinations:
 ```
-<DIGIT_SIZE> = [1000, 5000, 25000]
-<PAIR_SIZE> = [ 1000, 5000, 25000]
+--tnorm: [prod (S-Product), rprod (R-Product), luka (Lukasiewicz), godel (Gödel)]
+--DIGIT_size: [1000, 5000, 25000]
+--PAIR_size: [ 1000, 5000, 25000]
 ```
  
 - For model tuning we perform grid search over the following hyper-parameters using PairDEV set for development:
  ```
-<TRAIN_BATCH_SIZE>= [8, 16, 32, 64]
-<LEARNING_RATE>= [10^−1, 5×10^−2, 10^−2, 5×10^−3, 10^−3, 5×10^−4, 10^−4, 5×10^−5, 10^−5]
-<OPTIMIZER>= [0 (SGD), 1 (Adam)]
-<LAMBDA>= [0.05, 0.1, 0.5, 1, 1.5, 2] - Lambda coeficients for Coherence constraints.
-<NEPOCHS>: We trained each hyper-paramenter combination for 300 epochs to find the best one.
-<SEED>: 20 (dataset seed) & [0, 50](experiments seed)
+--train_batch_size: [8, 16, 32, 64]
+--learning_rate: [10^−1, 5×10^−2, 10^−2, 5×10^−3, 10^−3, 5×10^−4, 10^−4, 5×10^−5, 10^−5]
+--optimizer: [0 (SGD), 1 (Adam)]
+--lambda_coef [0.05, 0.1, 0.5, 1, 1.5, 2] - Lambda coeficients for Coherence constraints.
+--nepochs: We trained each hyper-paramenter combination for 300 epochs to find the best one.
  ```
 
-- We run the experiments three times using different seeds for each data combination with their corresponding best hyperparameters combinations from model tuning process. 
- 
- - We use the models from the epoch with best average development accuracy between Digit accuracy, Product Coherence accuracy and Sum Coherence accuracy:
+- We run the experiments three times using different seeds for each data combination with their corresponding best hyperparameters combinations from model tuning process. We use the models from the epoch with best average development accuracy between Digit accuracy, Product Coherence accuracy and Sum Coherence accuracy:
 
  ```
-<SEED>: [0, 20, 50] (extra runs in some cases with 1, 10, 60)
-<NEPOCHS>: [1600] (We ran 1600 epochs for all reported experiments, some configurations needed this number of epochs to converge)
-<TNORM>: t-norm in use. 
+--seed: 20 (dataset seed) & [0, 50](experiments seed): [0, 20, 50] (extra runs in some cases with 1, 10, 60)
+--nepochs: [1600] (We ran 1600 epochs for all reported experiments, some configurations needed this number of epochs to converge)
 ```
  
 - Using Gödel t-norm: to make it learn, we "warmed-up" the system by initially running (1 or 2) epochs of learning using S-Product t-norm.
 
 ```
-<WARM_UP_EPOCHS> = [1, 2] - The number of warm-up epochs. This process will use the hyper-parameters <LEARNING_RATE>, <OPTIMIZER> and <LAMBDA> training with S-Product t-norm for <WARM_UP_EPOCHS> epochs. For these three parameters we used the same ones we obtained from the S-Product hyperparamenter tunning.   
-<GODEL_OPTIM> = [0, 1] - The optimizer that will be used for training with Gödel t-norm after the warming-up process.
-<GODEL_LAMBDA> = [0.05, 0.1, 0.5, 1, 1.5, 2] - Lambda coeficient for Coherence constraints for training with Gödel t-norm after the warming-up process.
-<GODEL_LR> = [0.05, 0.1, 0.5, 1, 1.5, 2] - Learning rate for training with Gödel t-norm after the warming-up process.
+--warm_up_epochs: [1, 2] - The number of warm-up epochs. This process will use the hyper-parameters <LEARNING_RATE>, <OPTIMIZER> and <LAMBDA> training with S-Product t-norm for <WARM_UP_EPOCHS> epochs. For these three parameters we used the same ones we obtained from the S-Product hyperparamenter tunning.   
+--Godel_Optim: [0, 1] - The optimizer that will be used for training with Gödel t-norm after the warming-up process.
+--Godel_lambda: [0.05, 0.1, 0.5, 1, 1.5, 2] - Lambda coeficient for Coherence constraints for training with Gödel t-norm after the warming-up process.
+--Godel_lr: [0.05, 0.1, 0.5, 1, 1.5, 2] - Learning rate for training with Gödel t-norm after the warming-up process.
 ```
 
 - Other remaining input parameters:
 
  ```
-<TEST>: True to save the resulting models, False otherwise
+--test: True to save the resulting models, False otherwise
 validation_batch_size: 1024 or the biggest size allowed by the system used
 data_option: always 2
 data_seed: 20 or the one used to create the datasets in the previous section
 ```
  
 ```
-python3 training_jointly.py --test <TEST> --DIGIT_size <DIGIT_SIZE> --PAIR_size <PAIR_SIZE> --data_option 2 --data_seed 20 --Dev_Test_size 50000 --train_batch_size <TRAIN_BATCH_SIZE> --validation_batch_size 1024 --tnorm <TNORM> --nepochs <NEPOCHS> --seed <SEED> --learning_rate <LEARNING_RATE> --optimizer <OPTIMIZER> --lambda_coef <LAMBDA> --warm_up_epochs <WARM_UP_EPOCHS> --Godel_Optim <GODEL_OPTIM> --Godel_lambda <GODEL_LAMBDA> --Godel_lr <GODEL_LR>
+python3 training_jointly.py --test False --DIGIT_size 5000 --PAIR_size 5000 --data_option 2 --data_seed 20 --Dev_Test_size 50000 --train_batch_size 64 --validation_batch_size 1024 --tnorm rprod --nepochs 1000 --seed 20 --learning_rate 10^−1 --optimizer 0 --lambda_coef 0.1 --warm_up_epochs 2 --Godel_Optim 0 --Godel_lambda 0.1  --Godel_lr 0.001
 ```
 
 ## Pipelined Learning
@@ -193,34 +185,42 @@ python3 operator_model_train.py --test False --data_seed <PAIR_SEED> --DIGIT_siz
 ```
 
 
-# Testing
+## 4. Testing
 
-<i>We test the three models: Digit, Sum and Product. To get individual accuracies, single accuracies, coherence accuracies, and arithmetic properties: commutativity, associativity distributivity.</i>
+<i>We test the three models: Digit, Sum and Product obtained from a given data configuration, hyperparamenter setting, and learning protocol (joint or pipeline).</i>
 
+The following command outputs the Digit classifier accuracy on the test set, Sum/Product classifiers accuracies on PairTEST, fraction of examples in PairTEST where the coherence constraints and the commutativity,associativity and distributivity properties are satisfied for Sum and Product.
+ 
+ ```
+python3 models_tester.py --test_baseline False --seed_digit 20 --seed_operator 20 --tnorm rprod --digit_size 5000 --digit_lr 0.001 --digit_optim 1 --digit_epochs 250 --ope_size 5000 --data_option 2 --ope_lr 0.1 --ope_optim 0 --ope_epochs 250 --joint_lr 0.001 --joint_optim 0 --lamb 0.05 --joint_epochs 250
 
-#### To test we have to provide the paremeter description use to train each of the models we are testing:
+```
+ 
 
+Arguments description for 4:
 
-* <TEST_BASELINE>: True if it the pipelined setting that its being tested. False if it the joint setting.
-* <SEED_DIGIT>: Seed used to train the Digit model. (It should always be the same as the one used to train the operator models).
-* <SEED_OPERATOR>: Seed used to train the Sum and Prod operator models. (It should be the same as the one used to train the digit model).
-* <TNORM>: T-norm in use
-* <DIGIT_SIZE>: Size of the DIGIT set used.
-* <DIGIT_LR>:  Learning rate used to train the Digit model used to label de NOISYPAIR data.
-* <DIGIT_OPTIM>: Optimizer used to train the Digit model used to label the NOISYPAIR data. 0 if SGD, 1 if Adam.
-* <DIGIT_EPOCHS>: Number of epochs used to train the Digit classifier.
-* <OPE_SIZE>: Size of the NOISYPAIR set.
-* <DATA_OPTION>: Data option used during training. It should always be 2.
-* <OPE_LR>: Learning rate used to train the Sum and Prod operator models.
-* <OPE_OPTIM>: Optimizer used to train the Sum and Prod operator models. 0 if SGD, 1 if Adam.
-* <OPE_EPOCHS>: Number of epochs used to train the Sum and Prod operator classifiers.
-* <JOINT_LR>: Learning rate used for the joint learning process. (Only active if test_baseline is False)
-* <JONT_OPTIM>: Optimizer used used for the joint learning process. (Only active if test_baseline is False). 0 if SGD, 1 if Adam.
-* <LAMBDA>: Lambda coefficient used in the joint learning process (Only active if test_baseline is False).
-* <JOINT_EPOCHS>: Number of epochs used to train the joint classifier.
+```
+ 
+--test_baseline: True if it the pipelined setting that its being tested. False if it the joint setting.
+--seed_digit: Seed used to train the Digit model. (It should always be the same as the one used to train the operator models).
+--seed_operator: Seed used to train the Sum and Prod operator models. (It should be the same as the one used to train the digit model).
+--tnorm: t-norm in use
+--digit_size: Size of the DIGIT set used.
+--digit_lr:  Learning rate used to train the Digit model used to label de NOISYPAIR data.
+--digit_optim: Optimizer used to train the Digit model used to label the NOISYPAIR data. 0 if SGD, 1 if Adam.
+--digit_epochs: Number of epochs used to train the Digit classifier.
+--ope_size: Size of the NOISYPAIR set.
+--data_option: Data option used during training. It should always be 2.
+--ope_lr: Learning rate used to train the Sum and Prod operator models.
+--ope_optim: Optimizer used to train the Sum and Prod operator models. 0 if SGD, 1 if Adam.
+--ope_epochs: Number of epochs used to train the Sum and Prod operator classifiers.
+--joint_lr: Learning rate used for the joint learning process. (Only active if test_baseline is False)
+--joint_optim: Optimizer used used for the joint learning process. (Only active if test_baseline is False). 0 if SGD, 1 if Adam.
+--lamb: Lambda coefficient used in the joint learning process (Only active if test_baseline is False).
+--joint_epochs: Number of epochs used to train the joint classifier.
 
 
 ```
-python3 models_tester.py --test_baseline <TEST_BASELINE> --seed_digit <SEED_DIGIT> --seed_operator <SEED_OPERATOR> --tnorm <TNORM> --digit_size <DIGIT_SIZE> --digit_lr <DIGIT_LR> --digit_optim <DIGIT_OPTIM> --digit_epochs <DIGIT_EPOCHS> --ope_size <OPE_SIZE> --data_option <DATA_OPTION> --ope_lr <OPE_LR> --ope_optim <OPE_OPTIM> --ope_epochs <OPE_EPOCHS> --joint_lr <JOINT_LR> --joint_optim <JONT_OPTIM> --lamb <LAMBDA> --joint_epochs <JOINT_EPOCHS>
+ 
+ 
 
-```
