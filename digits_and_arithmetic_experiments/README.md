@@ -6,43 +6,53 @@ All the created datasets will be directed to be stored inside the ```/data``` di
 
 From the ```/code``` folder run the following commands:
 
-## Creating Main Datasets
+## 1. Creating datasets
 
-
-### To create the TRAIN, DEV, TEST datasets from MNIST [LeCun and Cortes, 2010]
-
-<i> Run (experiments in the paper use seed 20 to create the datasets): </i>
-
+#### 1.1 Splits of the original MNIST
+Note that the original MNIST dataset does not provide the `train-dev` splits, we use the following command to create `train, dev, test` splits from the original MNIST data. This creates a training set of size `50000` and a development set of size `10000`.
 ```
 python3 create_MNIST_train_dev_test.py --seed 20
 ```
 
-### DIGIT, PAIR, PairDEV, PairTEST (Note: PairDEV, PairTEST are both unique sets created (the same pair of sets) on every run for convenience)
+#### 1.2 Datasets for main experiments
 
-### Dataset combinations sizes:
-* <DIGIT_SIZE>: 1000, 5000, 25000
-* <PAIR_SIZE>: 1000, 5000, 25000
+We have two types of classifiers, ones for images containing single digits, and other ones for classifying a pair of digits, obtained from concatenation of two single digits. 
+<!-- We use the name `DIGIT` to denote all the datasets and models using a single digit and `PAIR` for datasets/models using a pair of digits. -->
 
-### Other input parameters:
-* operator_test_size: This is the size of PairDEV, PairTEST; we used 50,000 size for both of them. 
-* option: 2 (We did not consider other data option for this paper)
-* seed: We used seed 20 to create the datasets
-
-<i> Run (experiments in the paper use seed 20): </i>
-
+Additionally, to evaluate the effectiveness of t-norms in various data regimes, we further sample training sets of different sizes. This can be done using the following command:
+<!-- You can use the following command to create DIGIT, PAIR, PairDEV, PairTEST: -->
 ```
-python3 create_DIGIT_PAIR.py --mnist_seed 20 --single_size <DIGIT_SIZE> --operator_train_size <PAIR_SIZE> --operator_test_size 50000 --option 2 --seed 20 
+python3 create_DIGIT_PAIR.py --mnist_seed 20 --single_size 1000 --operator_train_size 1000 --operator_test_size 50000 --option 2 --seed 20 
+```
+This creates a pickle file containing the following datasets:
+```
+DIGIT: Sub-sampled (single digit) dataset for training
+PAIR: Creates examples containing pair of digits for training the operator (Sum/Product) classifiers. This is created from the sub-sampled dataset: DIGIT.
+PairDEV: The development set of a pair of images created from the MNIST development set (created in step 1.1).
+PairTEST: The test set of a pair of images created from the MNIST test set (from step 1.1).
 ```
 
-### Properties development and test datasets. To evaluate Commutativity, Associativity, Distributivity
+#### 1.3 Evaluation Sets
+To evaluate Commutativity, Associativity, Distributivity, we create corresponding evaluation sets:
 
 ```
 python3 create_properties_val_test_datasets.py --mnist_seed 20 --associativity_size 50000 --commutativity_size 50000 --distributivity_size 50000 --seed 20
 ```
 
-## Joint Learning
+Arguments description for 1.1, 1.2, 1.3:
+```
+--single_size : [1000, 5000, 25000] - the size of sub-sampled DIGIT training set.
+--operator_train_size : [1000, 5000, 25000] - the size of the PAIR training set.
+--operator_test_size: [50000] - size of PairDEV, PairTEST. 
+--option: 2 - Please do not change this.
+--seed: Seed value (20) for creating train, dev splits of original MNIST.
+--mnist_seed: (same as --seed)
+--associativity_size: Size of the Associativity evaluation set (Similarly for Commutativity, and Distributivity).
+```
 
-### We run experiments for each logic relaxation: <TNORM> 
+## 2. Joint Learning
+
+We run experiments for each logic relaxation: <TNORM> 
 
 * Lukasiewicz
 * Gödel
@@ -50,41 +60,50 @@ python3 create_properties_val_test_datasets.py --mnist_seed 20 --associativity_s
 * R-Product
 
 
-### for each dataset combinations sizes:
-* <DIGIT_SIZE>: 1000, 5000, 25000
-* <PAIR_SIZE>: 1000, 5000, 25000
+And for each dataset combinations sizes:
+```
+<DIGIT_SIZE> = [1000, 5000, 25000]
+<PAIR_SIZE> = [ 1000, 5000, 25000]
+```
+ 
+- For model tuning we perform grid search over the following hyper-parameters using PairDEV set for development:
+ ```
+<TRAIN_BATCH_SIZE>= [8, 16, 32, 64]
+<LEARNING_RATE>= [10^−1, 5×10^−2, 10^−2, 5×10^−3, 10^−3, 5×10^−4, 10^−4, 5×10^−5, 10^−5]
+<OPTIMIZER>= [0 (SGD), 1 (Adam)]
+<LAMBDA>= [0.05, 0.1, 0.5, 1, 1.5, 2] - Lambda coeficients for Coherence constraints.
+<NEPOCHS>: We trained each hyper-paramenter combination for 300 epochs to find the best one.
+<SEED>: 20 (dataset seed) & [0, 50](experiments seed)
+ ```
 
-### For model tuning we perform grid search over the following hyper-parameters using PairDEV set for development:
-* <TRAIN_BATCH_SIZE>: 8, 16, 32, 64
-* <LEARNING_RATE>: 10^−1, 5×10^−2, 10^−2, 5×10^−3, 10^−3, 5×10^−4, 10^−4, 5×10^−5, 10^−5
-* \<OPTIMIZER>: 0 (SGD), 1 (Adam)
-* \<LAMBDA>: 0.05, 0.1, 0.5, 1, 1.5, 2 - Lambda coeficient for Coherence constraints.
-* \<NEPOCHS>: We trained each hyper-paramenter combination for 300 epochs to find the best one.
-* \<SEED>: 20 (0, 50)
+- We run the experiments three times using different seeds for each data combination with their corresponding best hyperparameters combinations from model tuning process. 
+ 
+ - We use the models from the epoch with best average development accuracy between Digit accuracy, Product Coherence accuracy and Sum Coherence accuracy:
 
-### We run the experiments three times using different seeds for each data combination with their correspondent best hyperparameters combinations from model  tuning process. we store the models from the epoch with best average development accuracy between Digit accuracy, Product Coherence accuracy and Sum Coherence accuracy:
+ ```
+<SEED>: [0, 20, 50] (extra runs in some cases with 1, 10, 60)
+<NEPOCHS>: [1600] (We ran 1600 epochs for all reported experiments, some configurations needed this number of epochs to converge)
+<TNORM>: t-norm in use. 
+```
+ 
+- Using Gödel t-norm: to make it learn, we "warmed-up" the system by initially running (1 or 2) epochs of learning using S-Product t-norm.
 
-* \<SEED>: 0, 20, 50 (extra runs in some cases with 1, 10, 60)
-* \<NEPOCHS>: 1600 (We ran 1600 epochs for all reported experiments, some configurations needed this number of epochs to converge)
-* \<TNORM>: t-norm in use. 
+```
+<WARM_UP_EPOCHS> = [1, 2] - The number of warm-up epochs. This process will use the hyper-parameters <LEARNING_RATE>, <OPTIMIZER> and <LAMBDA> training with S-Product t-norm for <WARM_UP_EPOCHS> epochs. For these three parameters we used the same ones we obtained from the S-Product hyperparamenter tunning.   
+<GODEL_OPTIM> = [0, 1] - The optimizer that will be used for training with Gödel t-norm after the warming-up process.
+<GODEL_LAMBDA> = [0.05, 0.1, 0.5, 1, 1.5, 2] - Lambda coeficient for Coherence constraints for training with Gödel t-norm after the warming-up process.
+<GODEL_LR> = [0.05, 0.1, 0.5, 1, 1.5, 2] - Learning rate for training with Gödel t-norm after the warming-up process.
+```
 
-### Using Gödel t-norm: to make it learn, we "warmed-up" the system by initially by running (1 or 2) epochs of learning using S-Product t-norm.
+- Other remaining input parameters:
 
-* <WARM_UP_EPOCHS>: 1, 2 - The number of warm-up epochs. This process will use the hyper-parameters \<LEARNING_RATE>, \<OPTIMIZER> and \<LAMBDA> training with S-Product t-norm for <WARM_UP_EPOCHS> epochs. For these three parameters we used the same ones we obtained from the S-Product hyperparamenter tunning.   
-* <GODEL_OPTIM>: 0, 1 - The optimizer that will be used for training with Gödel t-norm after the warming-up process.
-* <GODEL_LAMBDA>: 0.05, 0.1, 0.5, 1, 1.5, 2 - Lambda coeficient for Coherence constraints for training with Gödel t-norm after the warming-up process.
-* <GODEL_LR>: 0.05, 0.1, 0.5, 1, 1.5, 2 - Learning rate for training with Gödel t-norm after the warming-up process.
-
-
-### Remaining input parameters:
-
-* \<TEST>: True to save the resulting models, False otherwise
-* validation_batch_size: 1024 or the biggest size allowed by the system used
-* data_option: always 2
-* data_seed: 20 or the one used to create the datasets in the previous section
-
-
-
+ ```
+<TEST>: True to save the resulting models, False otherwise
+validation_batch_size: 1024 or the biggest size allowed by the system used
+data_option: always 2
+data_seed: 20 or the one used to create the datasets in the previous section
+```
+ 
 ```
 python3 training_jointly.py --test <TEST> --DIGIT_size <DIGIT_SIZE> --PAIR_size <PAIR_SIZE> --data_option 2 --data_seed 20 --Dev_Test_size 50000 --train_batch_size <TRAIN_BATCH_SIZE> --validation_batch_size 1024 --tnorm <TNORM> --nepochs <NEPOCHS> --seed <SEED> --learning_rate <LEARNING_RATE> --optimizer <OPTIMIZER> --lambda_coef <LAMBDA> --warm_up_epochs <WARM_UP_EPOCHS> --Godel_Optim <GODEL_OPTIM> --Godel_lambda <GODEL_LAMBDA> --Godel_lr <GODEL_LR>
 ```
