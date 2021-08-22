@@ -1,0 +1,53 @@
+
+python368 ~/my_run.py "python -u train.py --gpuid 0 --dir data/ --dropout 0.5 --epochs 50 --learning_rate 0.0001 --clip 5 --save_file models/bilstm_lr00001 | tee models/bilstm_lr00001.txt" env_seq_tagging/
+
+python368 ~/my_run.py "python -u eval.py --gpuid 0 --dir ./data/ --dropout 0.0 --load_file ./models/bilstm_lr00001 | tee ./models/bilstm_lr00001.testlog.txt" env_seq_tagging/
+
+
+python368 ~/my_run.py "python -u train.py --use_f1 1 --use_luka --loss luka --gpuid 0 --dir data/ --dropout 0.5 --epochs 50 --learning_rate 0.0001 --clip 5 --save_file models/bilstm_lr00001_f1_luka_prod_10000 | tee models/bilstm_lr00001_f1_luka_prod_10000.txt" ../seq_tagging/env_seq_tagging/
+
+
+python368 ~/my_run.py "python -u train.py --use_f1 1 --use_luka --loss luka --gpuid 0 --dir data/ --dropout 0.5 --rnn_type gru --hidden_size 256 --use_char_enc --epochs 100 --learning_rate 0.0001 --clip 5 --save_file models/bilstm_lr00001_f1_luka_ep_100_hidden_256_gru_char_emb | tee models/bilstm_lr00001_f1_luka_ep_100_hidden_256_gru_char_emb.txt" ../seq_tagging/env_seq_tagging/
+
+python368 ~/my_run.py "python -u train.py --use_f1 1 --use_luka --loss luka --gpuid 0 --dir data/ --dropout 0.5 --rnn_type gru --hidden_size 256 --percent 0.1 --epochs 100 --learning_rate 0.0001 --clip 5 --save_file models/bilstm_lr00001_f1_luka_ep_100_hidden_256_gru_perc_0.1 | tee models/bilstm_lr00001_f1_luka_ep_100_hidden_256_gru_perc_0.1.txt" ../seq_tagging/env_seq_tagging/
+
+
+python368 ~/my_run.py "python -u train.py --use_f1 1 --gpuid 0 --dir data/ --dropout 0.5 --epochs 100 --percent 0.1 --learning_rate 0.0001 --clip 5 --save_file models/bilstm_lr00001_f1_perc_0.1 | tee models/bilstm_lr00001_f1_perc_0.1.txt" ../seq_tagging/env_seq_tagging/
+
+
+
+# ~/my_run.py := ~/ is Ashim's home directory and my_run.py is the program Ashim wrote to avoid SLURM. It takes the argument between "" and then it takes the virtual environment to use ../seq_tagging/env_seq_tagging/
+
+# -u := prints everything in real time
+# --gpuid := use the gpu
+# -- clip := to handle exploding gradient
+# | := pipe command used in linux. It takes the output of everything that comes before it and keeps it here.
+# tee := whatever is the output of the pipe it saves it to the logfile which is a text file with all the printings tee models/bilstm_lr00001_f1_luka_prod_10000.txt
+
+
+python -u train.py --use_luka --loss luka --gpuid 0 --dir data/ --dropout 0.5 --rnn_type gru --hidden_size 300 --percent 0.1 --epochs 500 --learning_rate 0.0001 --clip 5 --save_file models/bilstm_lr00001_luka_constrained_0.00001_ep_500_hidden_300_gru_perc_0.1 | tee models/bilstm_lr00001_luka_constrained_0.00001_ep_500_hidden_300_gru_perc_0.1.txt
+
+python368 ~/my_run.py "python -u train.py --use_luka --loss luka --gpuid 0 --dir data/ --dropout 0.5 --rnn_type gru --hidden_size 300 --percent 0.05 --epochs 500 --learning_rate 0.0001 --clip 5 --save_file models/bilstm_lr00001_luka_constrained_0.00001_ep_500_hidden_300_gru_perc_0.05 | tee models/bilstm_lr00001_luka_constrained_0.00001_ep_500_hidden_300_gru_perc_0.05.txt" ../seq_tagging/env_seq_tagging/
+
+
+python368 ~/my_run.py "python -u eval.py --use_f1 1 --gpuid 0 --dir data/ --load_file models/bilstm_lr00001_f1_perc_0.1" ../seq_tagging/env_seq_tagging/
+
+python368 ~/my_run.py "python -u train.py --use_f1 1 --use_luka --loss luka --gpuid 0 --dir data/ --dropout 0.5 --rnn_type gru --hidden_size 256 --percent 0.1 --epochs 500 --learning_rate 0.0001 --clip 5 --save_file models/bilstm_lr00001_f1_luka_ep_100_hidden_256_gru_perc_0.1_29_Nov_lambda_0.01 --constraints_lambda 0.01 | tee models/bilstm_lr00001_f1_luka_ep_500_hidden_256_gru_perc_0.1_29_Nov_lambda_0.01.txt" ../seq_tagging/env_seq_tagging/
+
+python368 ~/my_run.py "python -u eval.py --use_f1 1  --gpuid 0 --dir data/ --rnn_type gru --hidden_size 256 --load_file models/bilstm_lr00001_f1_luka_ep_100_hidden_256_gru_perc_0.1_29_Nov_lambda_0.05 " ../seq_tagging/env_seq_tagging/
+
+python -u train.py --use_f1 1 --gpuid 0 --dir data/ --dropout 0.5 --rnn_type lstm --hidden_size 256 --percent 1.0 --epochs 500 --learning_rate 0.0001 --clip 5 --save_file models/bilstm_lr00001_f1_r_prod_ep_100_hidden_256_lstm_perc_0.1_29_Nov_lambda_10.0 --constraints_lambda 10.0
+
+python -u train.py --use_f1 1 --gpuid 0 --dir data/ --dropout 0.5 --rnn_type lstm --hidden_size 256 --percent 1.0 --epochs 100 --learning_rate 0.0001 --clip 5 --save_file models/bilstm_lr00001_f1_s_prod_ep_100_hidden_256_lstm_perc_1.0_29_Nov_lambda_0.2 --constraints_lambda 0.2
+
+
+python -u eval.py --use_f1 1  --gpuid 0 --dir data/ --rnn_type lstm --hidden_size 256 --load_file
+
+
+python -u train.py  --use_godel --loss godel --gpuid 0 --dir data/ --dropout 0.5 --epochs 500 --learning_rate 0.0001 --clip 5 --save_file models/bilstm_lr00001_f1_godel_jan_2 --hidden_size 200
+
+python -u train.py --use_f1 1 --gpuid 0 --dir data/ --dropout 0.5 --rnn_type lstm --hidden_size 300 --percent 1.0 --epochs 500 --learning_rate 0.0001 --clip 5 --save_file models/godel_bilstm_full_jan --loss godel --use_godel
+python -u train.py --use_f1 1 --gpuid 0 --dir data/ --dropout 0.5 --rnn_type lstm --hidden_size 300 --percent 1.0 --epochs 500 --learning_rate 0.0001 --clip 5 --save_file models/godel_bilstm_full_jan_lambda_0.0002 --loss godel --use_godel --constraints_lambda 0.0002
+
+
+python -u train.py --use_f1 1 --gpuid 0 --dir data/ --dropout 0.5 --rnn_type lstm --hidden_size 300 --percent 0.1 --epochs 500 --learning_rate 0.0001 --clip 5 --save_file models/godel_bilstm_0.1_jan_lambda_0 --loss godel --use_godel --constraints_lambda 0
