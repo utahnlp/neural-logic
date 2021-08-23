@@ -1,4 +1,4 @@
-## Evaluating Relaxations of Logic for Neural Networks: A Comprehensive Study (IJCAI 2021)
+## Evaluating Relaxations of Logic for Neural Networks: A Comprehensive Study (IJCAI 2021) [[Link](https://arxiv.org/abs/2107.13646)]
 
 We empirically study the differences between logic relaxations using two tasks: recognizing digits and arithmetic operations over them, and text chunking.
 
