@@ -9,6 +9,6 @@ We empirically study the differences between logic relaxations using two tasks: 
 * [Documentation](digits_and_arithmetic_experiments/documentation.md) -->
 
 
-### Text chunking
+### [Text chunking](chunking)
 
 
